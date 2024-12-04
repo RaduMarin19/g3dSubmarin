@@ -1,5 +1,6 @@
 
 #include "includes.h"
+#include "model.h"
 #include "shader.h"
 
 int main()
@@ -36,7 +37,9 @@ int main()
 
     double lastFrame = 0.0;
 
-    //shader basicShader = shader("basicShader.fs", "basicShader.vs");
+    shader basicShader = shader("basicShader.fs", "basicShader.vs");
+
+    model basicModel = model("../Models/Submarine/submarine.obj");
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -47,6 +50,8 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        basicShader.use();
+        basicModel.render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
