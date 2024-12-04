@@ -4,7 +4,13 @@ project(g3dSubmarin)
 set(CMAKE_CXX_STANDARD 26)
 
 add_executable(g3dSubmarin g3dSubmarin.cpp
-        includes.h)
+        includes.h
+        model.cpp
+        model.h
+        mesh.cpp
+        mesh.h
+        shader.cpp
+        shader.h)
 
 
 find_package(GLUT REQUIRED)

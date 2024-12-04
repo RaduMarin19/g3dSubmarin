@@ -1,5 +1,6 @@
 
 #include "includes.h"
+#include "shader.h"
 
 int main()
 {
@@ -11,10 +12,17 @@ int main()
     // glfw window creation
     GLFWwindow* window = glfwCreateWindow(1280, 720, "SMMG3D-Submarin", NULL, NULL);
     if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        const char* errDescription;
+        int code = glfwGetError(&errDescription);
+        fprintf(stderr, "Error: %s\n", errDescription);
         glfwTerminate();
         return -1;
     }
+
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
 
     glfwMakeContextCurrent(window);
     // glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -27,6 +35,8 @@ int main()
     glewInit();
 
     double lastFrame = 0.0;
+
+    //shader basicShader = shader("basicShader.fs", "basicShader.vs");
 
     while (!glfwWindowShouldClose(window)) {
 
