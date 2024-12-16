@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\..\..\_external\GLEW\include;..\..\..\_external\glm;..\..\..\_external\GLFW\include;..\..\..\_external\STB;..\..\..\_external\freeglut\include;..\..\..\_external\packages\Assimp.3.0.0\build\native\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\..\..\_external\GLEW\lib\Release\x64;..\..\..\_external\GLFW\lib-vc2022;..\..\..\_external\freeglut\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\..\..\_external\GLEW\lib\Release\x64;..\..\..\_external\GLFW\lib-vc2022;..\..\..\_external\freeglut\lib\x64;..\..\..\_external\packages\Assimp.3.0.0\build\native\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,6 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,6 +133,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="g3dSubmarin.cpp" />
+    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="model.cpp" />
+    <ClCompile Include="shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="basicShader.fs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="basicShader.vs">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

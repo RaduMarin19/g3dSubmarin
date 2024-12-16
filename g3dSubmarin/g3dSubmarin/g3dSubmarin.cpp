@@ -248,9 +248,14 @@ int main()
 
     double lastFrame = 0.0;
 
+#if defined linux
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
-
     model basicModel = model("../Models/test/FlyingCube.obj");
+#else
+	shader basicShader = shader("basicShader.vs", "basicShader.fs");
+	model basicModel = model("..\\Models\\test\\FlyingCube.obj");
+#endif
+
 
 	std::cout << basicModel.m_meshes.size() << std::endl << " " << basicModel.m_indices.size() << std::endl;
 
