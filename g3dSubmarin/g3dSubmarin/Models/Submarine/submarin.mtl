@@ -1,0 +1,12 @@
+# Blender 4.3.0 MTL File: 'untitled.blend'
+# www.blender.org
+
+newmtl Material
+Ns 250.000000
+Ka 0.268182 0.268182 0.268182
+Kd 0.091296 0.120444 0.800259
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 4.300000
+d 1.000000
+illum 3

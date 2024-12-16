@@ -6,6 +6,7 @@
 #define MODEL_H
 #include "mesh.h"
 #include "includes.h"
+#include "shader.h"
 
 #define POSITION_LOCATION  0
 #define NORMAL_LOCATION    1
@@ -24,15 +25,16 @@ public:
     ~model();
     void init();
     void load(const char* filename);
-    void render();
-
-private:
+    void render(const shader& shader);
 
     std::vector<mesh> m_meshes;
     const aiScene* m_scene;
 
     std::vector<GLuint> m_indices;
     std::vector<vertex> m_vertices;
+    glm::mat4 m_rootTransform;
+
+private:
 
     GLuint m_vao;
     enum buffer_types {

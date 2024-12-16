@@ -29,7 +29,7 @@ void model::load(const char *filename) {
     glBindVertexArray(m_vao);
     glGenBuffers(std::size(m_buffers), m_buffers);
 
-    m_scene = m_importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    m_scene = m_importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
     if(m_scene) {
         m_meshes.resize(m_scene->mNumMeshes);
         for(int i = 0; i < m_scene->mNumMeshes; i++) {
@@ -52,13 +52,13 @@ void model::load(const char *filename) {
                 tmp.pos = pos;
 
                 if(mesh->HasNormals()) {
-                    glm::vec3 normals(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+                    glm::vec3 normals(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z);
                     tmp.normal = normals;
                 } else {
                     tmp.normal = glm::vec3(0, 0, 0);
                 }
 
-                if(mesh->HasTextureCoords(0)) {
+                if(mesh->mTextureCoords[0]) {
                     glm::vec2 texCoords(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y);
                     tmp.tex = texCoords;
                 } else {
@@ -73,6 +73,9 @@ void model::load(const char *filename) {
                     m_indices.push_back(face.mIndices[k]);
                 }
             }
+
+
+
         }
         glBindBuffer(GL_ARRAY_BUFFER, m_buffers[vertex_buffer]);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffers[index_buffer]);
@@ -96,13 +99,18 @@ void model::load(const char *filename) {
     glBindVertexArray(0);
 }
 
-void model::render() {
+void model::render(const shader& shader) {
     glBindVertexArray(m_vao);
+
+    shader.setMat4("model", m_rootTransform);
+
+    glActiveTexture(GL_TEXTURE0);
 
     for (unsigned int meshIndex = 0 ; meshIndex < m_meshes.size() ; meshIndex++) {
         unsigned int MaterialIndex = m_meshes[meshIndex].m_materialIndex;
         //assert(MaterialIndex < m_materials.size());
 
+        //std::cout << m_meshes[meshIndex].m_numIndices << ' ' << m_meshes[meshIndex].m_baseIndex << ' ' << m_meshes[meshIndex].m_baseVertex << ' ' << meshIndex << '\n';
         glDrawElementsBaseVertex(GL_TRIANGLES,
                                  m_meshes[meshIndex].m_numIndices,
                                  GL_UNSIGNED_INT,

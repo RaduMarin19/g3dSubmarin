@@ -1,14 +1,18 @@
-#version 330
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
 
-layout (location = 0) in vec3 Position;
-layout (location = 1) in vec2 TexCoord;
+out vec3 FragPos;
+out vec3 Normal;
 
-uniform mat4 gWVP;
-
-out vec2 TexCoord0;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
-    gl_Position = gWVP * vec4(Position, 1.0);
-    TexCoord0 = TexCoord;
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(transpose(inverse(model))) * aNormal;
+
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 }
