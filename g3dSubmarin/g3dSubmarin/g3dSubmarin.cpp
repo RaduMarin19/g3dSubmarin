@@ -250,14 +250,11 @@ int main()
 
 #if defined linux
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
-    model basicModel = model("../Models/test/FlyingCube.obj");
+    model basicModel = model("../Models/Submarine/submarine.obj", true);
 #else
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
-	model basicModel = model("..\\Models\\test\\FlyingCube.obj");
+	model basicModel = model("..\\Models\\test\\FlyingCube.obj", true);
 #endif
-
-
-	std::cout << basicModel.m_meshes.size() << std::endl << " " << basicModel.m_indices.size() << std::endl;
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -278,12 +275,10 @@ int main()
     	basicShader.setMat4("view", pCamera->GetViewMatrix());
 
     	// render the model
-    	glm::mat4 model = glm::translate(glm::mat4(1.0), {0.f, 0.f, 0.f});
+    	glm::mat4 model = glm::translate(glm::mat4(1.0), {0.f, 0.f, -20.f});
     	model = glm::scale(model, glm::vec3(0.8f));
-
-    	basicModel.m_rootTransform = model;
-    	//lightingShader.setMat4("model", model);
-    	basicModel.render(basicShader);
+    	basicShader.setMat4("model", model);
+    	basicModel.Draw(basicShader);
 
 
         glfwSwapBuffers(window);

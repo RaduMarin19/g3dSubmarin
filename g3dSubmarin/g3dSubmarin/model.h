@@ -1,53 +1,39 @@
-//
-// Created by mitza on 12/4/24.
-//
-
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
+#include <vector>
+#include <iostream>
+#include "texture.h"
 #include "mesh.h"
 #include "includes.h"
 #include "shader.h"
 
-#define POSITION_LOCATION  0
-#define NORMAL_LOCATION    1
-#define TEX_COORD_LOCATION 2
+unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
 
-struct vertex {
-    glm::vec3 pos;
-    glm::vec3 normal;
-    glm::vec2 tex;
-};
-
-class model {
-
+class model
+{
 public:
-    model(const char* filename);
-    ~model();
-    void init();
-    void load(const char* filename);
-    void render(const shader& shader);
+    // model data
+    std::vector<texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
+    std::vector<mesh>    meshes;
+    std::string directory;
+    bool gammaCorrection;
 
-    std::vector<mesh> m_meshes;
-    const aiScene* m_scene;
+    // constructor, expects a filepath to a 3D model.
+    model(std::string const& path, bool bSmoothNormals, bool gamma = false);
 
-    std::vector<GLuint> m_indices;
-    std::vector<vertex> m_vertices;
-    glm::mat4 m_rootTransform;
+    // draws the model, and thus all its meshes
+    virtual void Draw(shader& shader);
 
 private:
+    // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
+    void loadModel(std::string const& path, bool bSmoothNormals);
 
-    GLuint m_vao;
-    enum buffer_types {
-        index_buffer = 0,
-        vertex_buffer = 1,
-        uv_mat_buffer = 2,
-        num_buffers = 3
-    };
-    GLuint m_buffers[num_buffers] = {0};
+    // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
+    void processNode(aiNode* node, const aiScene* scene);
 
-    Assimp::Importer m_importer;
+    mesh processMesh(std::string nodeName, aiMesh* mesh, const aiScene* scene);
+
+    // checks all material textures of a given type and loads the textures if they're not loaded yet.
+    // the required info is returned as a Texture struct.
+    std::vector<texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
 };
 
-
-
-#endif //MODEL_H
