@@ -14,7 +14,9 @@ add_executable(g3dSubmarin g3dSubmarin.cpp
         texture.cpp
         texture.h
         vertex.h
-        stb_image.h)
+        stb_image.h
+        camera.cpp
+        camera.h)
 
 
 find_package(GLUT REQUIRED)
