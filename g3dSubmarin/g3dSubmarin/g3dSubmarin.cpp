@@ -91,6 +91,8 @@ int main()
 #else
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
 	model basicModel = model("..\\Models\\test\\FlyingCube.obj", true);
+	shader basicTexShader = shader("basicTextureShader.vs", "basicTextureShader.fs");
+	model basicGround = model("..\\Models\\sandDune\\Dune1.obj", true);
 #endif
 
     while (!glfwWindowShouldClose(window)) {
