@@ -111,7 +111,7 @@ void camera::ProcessKeyboard(ECameraMovementType direction, double deltaTime) {
                 break;
         }
         //clamp worldVelocity;
-        worldVelocity = glm::clamp(worldVelocity, -3.0f, 3.0f);
+        worldVelocity = glm::clamp(worldVelocity, -maxSpeed, maxSpeed);
 }
 
 void camera::MouseControl(GLFWwindow* window, double xpos, double ypos) {
@@ -154,35 +154,61 @@ void camera::updateDeltaTime(double dTime) {
 }
 
 void camera::applyMovement() {
+
         //apply the velocity vector to our position and then friction to the velocity vector;
-        yaw += worldVelocity.x;
-        pitch += worldVelocity.y;
+        yaw += worldVelocity.x > 0 ? sqrt(worldVelocity.x) : -sqrt(-worldVelocity.x);
+        pitch += worldVelocity.y > 0 ? sqrt(worldVelocity.y) : -sqrt(-worldVelocity.y);
 
-        //clamp yaw and pitch so we dont get jerky movement
-        yaw = glm::clamp(yaw, -120.0f, -60.0f);
-        pitch = glm::clamp(pitch, -30.0f, 30.0f);
+        //clamp1 pitch so we dont get jerky movement
+        pitch = glm::clamp(pitch, -90.0f, 90.0f);
 
-        position -= worldVelocity.z * forward;
+        position -= (worldVelocity.z > 0 ? sqrt(worldVelocity.z) : -sqrt(-worldVelocity.z)) * forward;
 
         if(worldVelocity.x >= 0) worldVelocity.x -= friction;
         if(worldVelocity.x <= 0) worldVelocity.x += friction;
 
+        if(worldVelocity.x < friction && worldVelocity.x > -friction) worldVelocity.x = 0;
+
         if(worldVelocity.y >= 0) worldVelocity.y -= friction;
         if(worldVelocity.y <= 0) worldVelocity.y += friction;
 
+        if(worldVelocity.y < friction && worldVelocity.y > -friction) worldVelocity.y = 0;
+
         if(worldVelocity.z >= 0) worldVelocity.z -= friction;
         if(worldVelocity.z <= 0) worldVelocity.z += friction;
+
+        if(worldVelocity.z < friction && worldVelocity.z > -friction) worldVelocity.z = 0;
 
         UpdateCameraVectors();
 
 }
 
-glm::vec3 camera::GetModelPos() {
-        glm::vec3 modelPos = GetPosition();
-        if(!isCameraFirstPerson)
-                modelPos -= glm::vec3(0, 3, 7.5);
-        else modelPos -= glm::vec3(0, 0.6, -1);
-        return modelPos;
+glm::mat4 camera::GetModelPos() {
+
+        glm::vec3 cameraPos = GetPosition();
+        glm::vec3 cameraForward = GetForward();
+        glm::vec3 cameraUp = GetUp();
+        glm::vec3 cameraRight = glm::cross(cameraForward, cameraUp);
+
+
+        glm::vec3 relativeOffset = glm::vec3(0.0f, -0.6f, -1.0f);
+        if (!isCameraFirstPerson) {
+                relativeOffset = glm::vec3(0.0f, -3.0f, 7.5f);
+        }
+
+
+        glm::vec3 modelPos = cameraPos +
+                             relativeOffset.x * cameraRight +
+                             relativeOffset.y * cameraUp +
+                             relativeOffset.z * cameraForward;
+
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, modelPos);
+
+        glm::mat4 rotation = glm::mat4_cast(glm::quatLookAt(cameraForward, cameraUp));
+
+        return model * rotation;
 }
 
 glm::vec3 camera::GetForward() {

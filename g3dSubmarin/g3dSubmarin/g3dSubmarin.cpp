@@ -114,10 +114,7 @@ int main()
 
     	// render the model
     	basicShader.SetVec3("objectColor", 1.f, 1.0f, 0.31f);
-    	glm::vec3 modelPos = pCamera->GetModelPos();
-    	glm::mat4 model = glm::translate(glm::mat4(1.0), modelPos);
-    	model = glm::rotate(model, glm::radians(180.f), pCamera->GetForward());
-    	model = glm::rotate(model, glm::radians(180.f), glm::vec3(0.f, 0.f, 1.f));
+    	glm::mat4 model = pCamera->GetModelPos();
 
     	model = glm::scale(model, glm::vec3(0.8f));
     	basicShader.setMat4("model", model);

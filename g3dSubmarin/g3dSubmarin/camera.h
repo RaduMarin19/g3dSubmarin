@@ -56,7 +56,7 @@ public:
 
 	void applyMovement();
 
-	glm::vec3 GetModelPos();
+	glm::mat4 GetModelPos();
 
 	glm::vec3 GetForward();
 
@@ -93,7 +93,7 @@ protected:
 	glm::vec3 worldVelocity;
 	const float friction = 0.01f;
 	const float accelerationFactor = 0.05f;
-	const float maxSpeed = 3.0f;
+	const float maxSpeed = 9.0f;
 
 	bool isCameraFirstPerson = false;
 
