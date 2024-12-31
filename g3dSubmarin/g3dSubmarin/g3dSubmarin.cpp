@@ -3,11 +3,14 @@
 #include "model.h"
 #include "shader.h"
 #include "camera.h"
+#include "worldChunks.h"
 
 
 camera *pCamera = new camera(1280, 720, glm::vec3(0.0, 0.0, 0.0));;
 int main()
 {
+
+	srand(time(NULL));
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -78,8 +81,11 @@ int main()
 
     double lastFrame = 0.0;
 
+	worldChunks world(0.f, 0.f, 0.f);
+
 #if defined linux
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
+	shader basicTexShader = shader("../basicTextureShader.vs", "../basicTextureShader.fs");
     model basicModel = model("../Models/Submarine/submarine.obj", true);
 	model basicGround = model("../Models/Grass/10450_Rectangular_Grass_Patch_v1_iterations-2.obj", true);
 #else
@@ -100,17 +106,30 @@ int main()
     	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
     	basicShader.SetVec3("lightPos", {0.2f, 1.f, 0.3f});
     	basicShader.SetVec3("viewPos", pCamera->GetPosition());
+    	basicShader.setInt("texture_diffuse1", 0);
 
     	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
     	basicShader.setMat4("view", pCamera->GetViewMatrix());
 
-    	//render a basic floor
-    	basicShader.SetVec3("objectColor", 0.2f, 1.0f, 0.31f);
-    	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), {0.f, -10.f, 0.f});
-    	modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-    	modelMatrix = glm::scale(modelMatrix, glm::vec3(5.f));
-    	basicShader.setMat4("model", modelMatrix);
-    	basicGround.Draw(basicShader);
+    	//render our chunks
+    	for(const auto & chunkRow : world.getChunks()) {
+    		for(const auto & chunk : chunkRow) {
+    			basicShader.SetVec3("objectColor", chunk.r, chunk.g, chunk.b);
+    			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), {chunk.x, chunk.y, chunk.z});
+    			modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
+    			modelMatrix = glm::scale(modelMatrix, glm::vec3(5.f));
+    			basicShader.setMat4("model", modelMatrix);
+    			basicGround.Draw(basicTexShader);
+    		}
+    	}
+
+    	basicShader.use();
+    	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    	basicShader.SetVec3("lightPos", {0.2f, 1.f, 0.3f});
+    	basicShader.SetVec3("viewPos", pCamera->GetPosition());
+
+    	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
+    	basicShader.setMat4("view", pCamera->GetViewMatrix());
 
     	// render the model
     	basicShader.SetVec3("objectColor", 1.f, 1.0f, 0.31f);
@@ -121,6 +140,8 @@ int main()
     	basicModel.Draw(basicShader);
 
     	pCamera->applyMovement();
+
+    	world.validateChunks(pCamera->GetPosition());
 
 
         glfwSwapBuffers(window);

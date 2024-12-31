@@ -16,7 +16,7 @@
 #include <memory.h>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include <random>
 
 #include "GL/glew.h"
 #include "GL/freeglut.h"
