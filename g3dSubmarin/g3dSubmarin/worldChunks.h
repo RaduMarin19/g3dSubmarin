@@ -24,7 +24,7 @@ public:
 
 private:
     std::vector<std::vector<worldChunk>> chunks;
-    const float chunkSize = 1280.f;
+    const float chunkSize = 1024.f;
 
 };
 

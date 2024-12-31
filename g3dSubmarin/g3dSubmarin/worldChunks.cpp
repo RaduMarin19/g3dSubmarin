@@ -29,7 +29,14 @@ std::vector<std::vector<worldChunk>> & worldChunks::getChunks() {
 }
 
 void worldChunks::validateChunks(glm::vec3 position) {
-    std::cout << position.x << " " << position.y << " " << position.z << std::endl;
+    for(const auto & row : chunks) {
+        for(auto & chunk : row) {
+            if(chunk.z - chunkSize / 2 < position.z && position.z < chunk.z + chunkSize / 2) {
+            if(chunk.x - chunkSize / 2 < position.x && position.x < chunk.x + chunkSize / 2) {
+                }
+            }
+        }
+    }
 }
 
 worldChunks::~worldChunks() {

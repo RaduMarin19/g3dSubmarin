@@ -146,6 +146,7 @@ vector<texture> model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
     {
         aiString str;
         mat->GetTexture(type, i, &str);
+        std::cout << str.C_Str() << '\n';
         // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
         bool skip = false;
         for (unsigned int j = 0; j < textures_loaded.size(); j++)
@@ -174,6 +175,8 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 {
     string filename = string(path);
     filename = directory + '/' + filename;
+
+    std::cout << "Loading texture from: " << filename << std::endl;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);

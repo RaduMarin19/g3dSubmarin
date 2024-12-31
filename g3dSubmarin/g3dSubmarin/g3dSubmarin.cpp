@@ -6,7 +6,7 @@
 #include "worldChunks.h"
 
 
-camera *pCamera = new camera(1280, 720, glm::vec3(0.0, 0.0, 0.0));;
+camera *pCamera = new camera(1280, 720, glm::vec3(0.0, 100.0, 0.0));;
 int main()
 {
 
@@ -75,7 +75,7 @@ int main()
 
 	});
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glewInit();
 
@@ -87,7 +87,7 @@ int main()
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
 	shader basicTexShader = shader("../basicTextureShader.vs", "../basicTextureShader.fs");
     model basicModel = model("../Models/Submarine/submarine.obj", true);
-	model basicGround = model("../Models/Grass/10450_Rectangular_Grass_Patch_v1_iterations-2.obj", true);
+	model basicGround = model("../Models/sandDune/Dune1.obj", true);
 #else
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
 	model basicModel = model("..\\Models\\test\\FlyingCube.obj", true);
@@ -102,30 +102,33 @@ int main()
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    	basicShader.use();
-    	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    	basicShader.SetVec3("lightPos", {0.2f, 1.f, 0.3f});
-    	basicShader.SetVec3("viewPos", pCamera->GetPosition());
-    	basicShader.setInt("texture_diffuse1", 0);
+    	basicTexShader.use();
+    	basicTexShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    	basicTexShader.SetVec3("lightPos", {0.2f, 100.f, 0.3f});
+    	basicTexShader.SetVec3("viewPos", pCamera->GetPosition());
+    	basicTexShader.setInt("texture_diffuse1", 0);
 
-    	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
-    	basicShader.setMat4("view", pCamera->GetViewMatrix());
+    	basicTexShader.setMat4("projection", pCamera->GetProjectionMatrix());
+    	basicTexShader.setMat4("view", pCamera->GetViewMatrix());
 
     	//render our chunks
     	for(const auto & chunkRow : world.getChunks()) {
     		for(const auto & chunk : chunkRow) {
-    			basicShader.SetVec3("objectColor", chunk.r, chunk.g, chunk.b);
+    			basicTexShader.SetVec3("objectColor", chunk.r, chunk.g, chunk.b);
     			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), {chunk.x, chunk.y, chunk.z});
-    			modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
-    			modelMatrix = glm::scale(modelMatrix, glm::vec3(5.f));
-    			basicShader.setMat4("model", modelMatrix);
+    			//modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
+    			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
+    			basicTexShader.setMat4("model", modelMatrix);
     			basicGround.Draw(basicTexShader);
     		}
     	}
 
+    	glm::vec3 camPos = pCamera->GetPosition();
+    	std::cout << camPos.x << " " << camPos.y << " " << camPos.z << std::endl;
+
     	basicShader.use();
     	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    	basicShader.SetVec3("lightPos", {0.2f, 1.f, 0.3f});
+    	basicShader.SetVec3("lightPos", {0.2f, 100.f, 0.3f});
     	basicShader.SetVec3("viewPos", pCamera->GetPosition());
 
     	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
