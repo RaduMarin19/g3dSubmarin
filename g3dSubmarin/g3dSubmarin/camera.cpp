@@ -23,6 +23,8 @@ void camera::Set(const int width, const int height, const glm::vec3 &position) {
         this->worldUp = glm::vec3(0, 1, 0);
         this->position = position;
 
+        this->worldVelocity = glm::vec3(0, 0, 0);
+
         lastX = width / 2.0f;
         lastY = height / 2.0f;
         bFirstMouseMove = true;
@@ -68,26 +70,48 @@ const glm::mat4 camera::GetProjectionMatrix() const {
 
 void camera::ProcessKeyboard(ECameraMovementType direction, double deltaTime) {
         float velocity = (float)(cameraSpeedFactor * deltaTime);
+        // switch (direction) {
+        //         case ECameraMovementType::FORWARD:
+        //                 position += forward * velocity;
+        //         break;
+        //         case ECameraMovementType::BACKWARD:
+        //                 position -= forward * velocity;
+        //         break;
+        //         case ECameraMovementType::LEFT:
+        //                 position -= right * velocity;
+        //         break;
+        //         case ECameraMovementType::RIGHT:
+        //                 position += right * velocity;
+        //         break;
+        //         case ECameraMovementType::UP:
+        //                 position += up * velocity;
+        //         break;
+        //         case ECameraMovementType::DOWN:
+        //                 position -= up * velocity;
+        //         break;
+        // }
         switch (direction) {
                 case ECameraMovementType::FORWARD:
-                        position += forward * velocity;
+                        worldVelocity.z -= accelerationFactor * velocity;
                 break;
                 case ECameraMovementType::BACKWARD:
-                        position -= forward * velocity;
+                        worldVelocity.z += accelerationFactor * velocity;
                 break;
                 case ECameraMovementType::LEFT:
-                        position -= right * velocity;
+                        worldVelocity.x -= accelerationFactor * velocity;
                 break;
                 case ECameraMovementType::RIGHT:
-                        position += right * velocity;
+                        worldVelocity.x +=  accelerationFactor * velocity;
                 break;
                 case ECameraMovementType::UP:
-                        position += up * velocity;
+                        worldVelocity.y += accelerationFactor * velocity;
                 break;
                 case ECameraMovementType::DOWN:
-                        position -= up * velocity;
+                        worldVelocity.y -= accelerationFactor * velocity;
                 break;
         }
+        //clamp worldVelocity;
+        worldVelocity = glm::clamp(worldVelocity, -3.0f, 3.0f);
 }
 
 void camera::MouseControl(GLFWwindow* window, double xpos, double ypos) {
@@ -129,7 +153,56 @@ void camera::updateDeltaTime(double dTime) {
         this->deltaTime = dTime;
 }
 
+void camera::applyMovement() {
+        //apply the velocity vector to our position and then friction to the velocity vector;
+        yaw += worldVelocity.x;
+        pitch += worldVelocity.y;
+
+        //clamp yaw and pitch so we dont get jerky movement
+        yaw = glm::clamp(yaw, -120.0f, -60.0f);
+        pitch = glm::clamp(pitch, -30.0f, 30.0f);
+
+        position -= worldVelocity.z * forward;
+
+        if(worldVelocity.x >= 0) worldVelocity.x -= friction;
+        if(worldVelocity.x <= 0) worldVelocity.x += friction;
+
+        if(worldVelocity.y >= 0) worldVelocity.y -= friction;
+        if(worldVelocity.y <= 0) worldVelocity.y += friction;
+
+        if(worldVelocity.z >= 0) worldVelocity.z -= friction;
+        if(worldVelocity.z <= 0) worldVelocity.z += friction;
+
+        UpdateCameraVectors();
+
+}
+
+glm::vec3 camera::GetModelPos() {
+        glm::vec3 modelPos = GetPosition();
+        if(!isCameraFirstPerson)
+                modelPos -= glm::vec3(0, 3, 7.5);
+        else modelPos -= glm::vec3(0, 0.6, -1);
+        return modelPos;
+}
+
+glm::vec3 camera::GetForward() {
+        return this->forward;
+}
+
+glm::vec3 camera::GetRight() {
+        return this->right;
+}
+
+glm::vec3 camera::GetUp() {
+        return this->up;
+}
+
+void camera::SwitchCameraPerspective() {
+        isCameraFirstPerson = !isCameraFirstPerson;
+}
+
 void camera::ProcessMouseMovement(const float xOffset, const float yOffset, const bool constrainPitch) {
+        return;
         yaw += xOffset;
         pitch += yOffset;
 

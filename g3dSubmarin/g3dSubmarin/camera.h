@@ -54,6 +54,18 @@ public:
 
 	void updateDeltaTime(double dTime);
 
+	void applyMovement();
+
+	glm::vec3 GetModelPos();
+
+	glm::vec3 GetForward();
+
+	glm::vec3 GetRight();
+
+	glm::vec3 GetUp();
+
+	void SwitchCameraPerspective();
+
 private:
 	void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
 
@@ -77,6 +89,13 @@ protected:
 	glm::vec3 right;
 	glm::vec3 up;
 	glm::vec3 worldUp;
+
+	glm::vec3 worldVelocity;
+	const float friction = 0.01f;
+	const float accelerationFactor = 0.05f;
+	const float maxSpeed = 3.0f;
+
+	bool isCameraFirstPerson = false;
 
 	// Euler Angles
 	float yaw;

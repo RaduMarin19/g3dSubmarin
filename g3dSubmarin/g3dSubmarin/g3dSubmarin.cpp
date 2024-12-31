@@ -48,25 +48,28 @@ int main()
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(FORWARD, pCamera->getDeltaTime());
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(BACKWARD, pCamera->getDeltaTime());
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(LEFT, pCamera->getDeltaTime());
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(RIGHT, pCamera->getDeltaTime());
-	if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(UP, pCamera->getDeltaTime());
-	if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 		pCamera->ProcessKeyboard(DOWN, pCamera->getDeltaTime());
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
 		int width, height;
 		glfwGetWindowSize(window, &width, &height);
 		pCamera->Reset(width, height);
-
 	}
+		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+			pCamera->SwitchCameraPerspective();
+		}
+
 	});
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -78,6 +81,7 @@ int main()
 #if defined linux
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
     model basicModel = model("../Models/Submarine/submarine.obj", true);
+	model basicGround = model("../Models/Grass/10450_Rectangular_Grass_Patch_v1_iterations-2.obj", true);
 #else
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
 	model basicModel = model("..\\Models\\test\\FlyingCube.obj", true);
@@ -93,7 +97,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     	basicShader.use();
-    	basicShader.SetVec3("objectColor", 1.f, 1.0f, 0.31f);
     	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
     	basicShader.SetVec3("lightPos", {0.2f, 1.f, 0.3f});
     	basicShader.SetVec3("viewPos", pCamera->GetPosition());
@@ -101,11 +104,26 @@ int main()
     	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
     	basicShader.setMat4("view", pCamera->GetViewMatrix());
 
+    	//render a basic floor
+    	basicShader.SetVec3("objectColor", 0.2f, 1.0f, 0.31f);
+    	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), {0.f, -10.f, 0.f});
+    	modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+    	modelMatrix = glm::scale(modelMatrix, glm::vec3(5.f));
+    	basicShader.setMat4("model", modelMatrix);
+    	basicGround.Draw(basicShader);
+
     	// render the model
-    	glm::mat4 model = glm::translate(glm::mat4(1.0), {0.f, 0.f, -20.f});
+    	basicShader.SetVec3("objectColor", 1.f, 1.0f, 0.31f);
+    	glm::vec3 modelPos = pCamera->GetModelPos();
+    	glm::mat4 model = glm::translate(glm::mat4(1.0), modelPos);
+    	model = glm::rotate(model, glm::radians(180.f), pCamera->GetForward());
+    	model = glm::rotate(model, glm::radians(180.f), glm::vec3(0.f, 0.f, 1.f));
+
     	model = glm::scale(model, glm::vec3(0.8f));
     	basicShader.setMat4("model", model);
     	basicModel.Draw(basicShader);
+
+    	pCamera->applyMovement();
 
 
         glfwSwapBuffers(window);
