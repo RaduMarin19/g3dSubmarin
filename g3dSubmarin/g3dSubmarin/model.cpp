@@ -29,8 +29,11 @@ void model::loadModel(string const& path, bool bSmoothNormals)
         return;
     }
     // retrieve the directory path of the filepath
+#ifdef __linux__
     directory = path.substr(0, path.find_last_of("/"));
-
+#else
+    directory = path.substr(0, path.find_last_of("\\"));
+#endif
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 }

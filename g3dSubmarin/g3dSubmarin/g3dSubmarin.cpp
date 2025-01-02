@@ -1,4 +1,6 @@
-
+#include <Windows.h>
+#include <locale>
+#include <codecvt>
 #include <map>
 
 #include "includes.h"
@@ -88,7 +90,7 @@ int main()
 
 	worldChunks world(1.f, -1.f, 1.f);
 
-#if defined linux
+#ifdef __linux__
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
 	shader basicTexShader = shader("../basicTextureShader.vs", "../basicTextureShader.fs");
 	shader basicWaterShader = shader("../basicWaterShader.vs",  "../basicWaterShader.fs");
@@ -103,12 +105,21 @@ int main()
 	model coral2 = model("../Models/coral2/10010_Coral_v1_L3.obj", true);
 	model coral3 = model("../Models/coral3/21488_Tree_Coral_v2_NEW.obj", true);
 #else
+    wchar_t buffer[MAX_PATH];
+    GetCurrentDirectoryW(MAX_PATH, buffer);
+
+    std::wstring executablePath(buffer);
+    std::wstring wscurrentPath = executablePath.substr(0, executablePath.find_last_of(L"\\/"));
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::string currentPath = converter.to_bytes(wscurrentPath);
+
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
 	shader basicTexShader = shader("basicTextureShader.vs", "basicTextureShader.fs");
 	shader basicWaterShader = shader("basicWaterShader.vs",  "basicWaterShader.fs");
 	shader basicSunShader = shader("basicSunShader.vs",  "basicSunShader.fs");
-	model basicModel = model("..\\Models\\Submarine\\submarine.obj", true);
-	model basicGround = model("..\\Models\\sand\\sand.obj", true);
+	model basicModel = model("C:\\Users\\marin\\OneDrive\\Desktop\\Anul2\\g3d\\g3dSubmarin\\g3dSubmarin\\g3dSubmarin\\Models\\Submarine\\submarine.obj", true);
+	model basicGround = model(currentPath + "\\Models\\sand\\sand.obj", true);
 	model water = model("..\\Models\\water\\water.obj", true);
 	model sun = model("..\\Models\\sun\\13913_Sun_v2_l3.obj", true);
 	model fish1 = model("..\\Models\\fish1\\fish.obj", true);
@@ -185,7 +196,7 @@ int main()
     				if(obj.Id == 1) {
     					modelMatrix = glm::scale(modelMatrix, obj.scale * 5.f);
     				} else modelMatrix = glm::scale(modelMatrix, obj.Id == 2 ? obj.scale / 6.f : obj.scale);
-    				model *accesory;
+    				model *accesory=nullptr;
     				switch(obj.Id) {
     					case 0:
     						accesory = &fish1;
