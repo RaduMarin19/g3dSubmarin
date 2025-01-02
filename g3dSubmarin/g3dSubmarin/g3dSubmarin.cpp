@@ -118,15 +118,15 @@ int main()
 	shader basicTexShader = shader("basicTextureShader.vs", "basicTextureShader.fs");
 	shader basicWaterShader = shader("basicWaterShader.vs",  "basicWaterShader.fs");
 	shader basicSunShader = shader("basicSunShader.vs",  "basicSunShader.fs");
-	model basicModel = model("C:\\Users\\marin\\OneDrive\\Desktop\\Anul2\\g3d\\g3dSubmarin\\g3dSubmarin\\g3dSubmarin\\Models\\Submarine\\submarine.obj", true);
+	model basicModel = model(currentPath + "\\Models\\Submarine\\submarine.obj", true);
 	model basicGround = model(currentPath + "\\Models\\sand\\sand.obj", true);
-	model water = model("..\\Models\\water\\water.obj", true);
-	model sun = model("..\\Models\\sun\\13913_Sun_v2_l3.obj", true);
-	model fish1 = model("..\\Models\\fish1\\fish.obj", true);
-	model fish2 = model("..\\Models\\fish2\\13009_Coral_Beauty_Angelfish_v1_l3.obj", true);
-	model coral1 = model("..\\Models\\coral1\\21487_Gorgonian_Soft_Coral_v1.obj", true);
-	model coral2 = model("..\\Models\\coral2\\10010_Coral_v1_L3.obj", true);
-	model coral3 = model("..\\Models\\coral3\\21488_Tree_Coral_v2_NEW.obj", true);
+	model water = model(currentPath + "\\Models\\water\\water.obj", true);
+	model sun = model(currentPath + "\\Models\\sun\\13913_Sun_v2_l3.obj", true);
+	model fish1 = model(currentPath + "\\Models\\fish1\\fish.obj", true);
+	model fish2 = model(currentPath + "\\Models\\fish2\\13009_Coral_Beauty_Angelfish_v1_l3.obj", true);
+	model coral1 = model(currentPath + "\\Models\\coral1\\21487_Gorgonian_Soft_Coral_v1.obj", true);
+	model coral2 = model(currentPath + "\\Models\\coral2\\10010_Coral_v1_L3.obj", true);
+	model coral3 = model(currentPath + "\\Models\\coral3\\21488_Tree_Coral_v2_NEW.obj", true);
 #endif
 
 	glm::vec3 sunPosition = {0.f, 350.f, 0.f};
