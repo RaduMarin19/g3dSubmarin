@@ -162,14 +162,7 @@ void camera::applyMovement() {
         //clamp1 pitch so we dont get jerky movement
         pitch = glm::clamp(pitch, -90.0f, 90.0f);
 
-        glm::vec3 displacement = (worldVelocity.z > 0 ? sqrt(worldVelocity.z) : -sqrt(-worldVelocity.z)) * forward;
-        //std::cout << displacement.y << '\n';
-        if(position.y - displacement.y > minCameraY && position.y - displacement.y < maxCameraY)
-                position -= displacement;
-        else {
-                position.x -= displacement.x;
-                position.z -= displacement.z;
-        }
+        position -= (worldVelocity.z > 0 ? sqrt(worldVelocity.z) : -sqrt(-worldVelocity.z)) * forward;
 
         if(worldVelocity.x >= 0) worldVelocity.x -= friction;
         if(worldVelocity.x <= 0) worldVelocity.x += friction;

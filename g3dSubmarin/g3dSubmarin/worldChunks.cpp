@@ -15,36 +15,10 @@ worldChunks::worldChunks(float xCenter, float yCenter, float zCenter) {
             chunk.x = startX;
             chunk.z = startZ;
             chunk.y = 0;
+            startX += chunkSize;
             chunk.r = (rand() % 256) / 256.0f;
             chunk.g = (rand() % 256) / 256.0f;
             chunk.b = (rand() % 256) / 256.0f;
-
-            for(int i = 0 ; i < 100; i++) {
-                //generate 100 random objects
-                object newObj;
-                //0 - fish1
-                //1 - fish2
-                //2 - coral1
-                //3 - coral2
-                //4 - coral3
-                newObj.Id = rand() % 3;
-                glm::vec3 objPos;
-                glm::vec3 objRotation;
-                glm::vec3 objScale;
-                if(newObj.Id < 2) {
-                    objPos = glm::vec3(startX - chunkSize / 2 + rand() % (int)chunkSize, 5 + rand() % 100 , startZ - chunkSize / 2 + rand() % (int)chunkSize);
-                    objRotation = glm::vec3(0.f);
-                } else {
-                    objPos = glm::vec3(startX - chunkSize / 2 + rand() % (int)chunkSize, -25 + rand() % 10 , startZ - chunkSize / 2 + rand() % (int)chunkSize);
-                    objRotation = glm::vec3(0.f);
-                }
-                objScale = glm::vec3(rand() % 80 / 10.f);
-                newObj.scale = objScale;
-                newObj.rotation = objRotation;
-                newObj.position = objPos;
-                chunk.objects[i] = newObj;
-            }
-            startX += chunkSize;
         }
         startZ += chunkSize;
     }

@@ -64,11 +64,6 @@ void mesh::Draw(shader& shader)
    unsigned int heightNr = 1;
    for (unsigned int i = 0; i < textures.size(); i++)
    {
-
-      if (glIsTexture(textures[i].id) == GL_FALSE) {
-         std::cout << "Texture ID " << textures[i].id << " is invalid." << std::endl;
-      }
-
       glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
       // retrieve texture number (the N in diffuse_textureN)
       string number;
@@ -84,7 +79,6 @@ void mesh::Draw(shader& shader)
 
      // now set the sampler to the correct texture unit
       std::string textureName = (name + number);
-      //std::cout << textureName << std::endl;
       int location = glGetUniformLocation(shader.ID, textureName.c_str());
       if (location != -1) {
          glUniform1i(location, i);
@@ -94,7 +88,6 @@ void mesh::Draw(shader& shader)
    }
 
    // draw mesh
-   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    glBindVertexArray(VAO);
 
    //std::cout << "draw triangles: " << numIndexes << std::endl;

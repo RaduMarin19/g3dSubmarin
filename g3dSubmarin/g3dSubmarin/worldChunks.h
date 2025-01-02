@@ -6,18 +6,11 @@
 #define WORLDCHUNKS_H
 #include "includes.h"
 
-struct object {
-    int Id;
-    glm::vec3 position;
-    glm::vec3 rotation;
-    glm::vec3 scale;
-
-};
 
 struct worldChunk {
     float x, y, z;
     float r, g, b;
-    object objects[100];
+
 };
 
 class worldChunks {
