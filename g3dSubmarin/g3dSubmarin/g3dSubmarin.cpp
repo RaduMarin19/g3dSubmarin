@@ -1,4 +1,6 @@
 
+#include <map>
+
 #include "includes.h"
 #include "model.h"
 #include "shader.h"
@@ -27,10 +29,13 @@ int main()
         return -1;
     }
 
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
-    glCullFace(GL_BACK);
-    glEnable(GL_DEPTH_TEST);
+     glFrontFace(GL_CCW);
+	// glEnable(GL_CULL_FACE);
+ //    glCullFace(GL_FRONT_AND_BACK);
+	// glEnable(GL_DEPTH_TEST);
+	// glDepthFunc(GL_LEQUAL);
+	glDisable(GL_CULL_FACE);
+
 
     glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, nullptr);
@@ -81,56 +86,145 @@ int main()
 
     double lastFrame = 0.0;
 
-	worldChunks world(0.f, 0.f, 0.f);
+	worldChunks world(1.f, -1.f, 1.f);
 
 #if defined linux
     shader basicShader = shader("../basicShader.vs", "../basicShader.fs");
 	shader basicTexShader = shader("../basicTextureShader.vs", "../basicTextureShader.fs");
+	shader basicWaterShader = shader("../basicWaterShader.vs",  "../basicWaterShader.fs");
+	shader basicSunShader = shader("../basicSunShader.vs",  "../basicSunShader.fs");
     model basicModel = model("../Models/Submarine/submarine.obj", true);
-	model basicGround = model("../Models/sandDune/Dune1.obj", true);
+	model basicGround = model("../Models/sand/sand.obj", true);
+	model water = model("../Models/water/water.obj", true);
+	model sun = model("../Models/sun/13913_Sun_v2_l3.obj", false);
+	model fish1 = model("../Models/fish1/fish.obj", true);
+	model fish2 = model("../Models/fish2/13009_Coral_Beauty_Angelfish_v1_l3.obj", true);
+	model coral1 = model("../Models/coral1/21487_Gorgonian_Soft_Coral_v1.obj", true);
+	model coral2 = model("../Models/coral2/10010_Coral_v1_L3.obj", true);
+	model coral3 = model("../Models/coral3/21488_Tree_Coral_v2_NEW.obj", true);
 #else
 	shader basicShader = shader("basicShader.vs", "basicShader.fs");
-	model basicModel = model("..\\Models\\test\\FlyingCube.obj", true);
 	shader basicTexShader = shader("basicTextureShader.vs", "basicTextureShader.fs");
-	model basicGround = model("..\\Models\\sandDune\\Dune1.obj", true);
+	shader basicWaterShader = shader("basicWaterShader.vs",  "basicWaterShader.fs");
+	shader basicSunShader = shader("basicSunShader.vs",  "basicSunShader.fs");
+	model basicModel = model("..\\Models\\Submarine\\submarine.obj", true);
+	model basicGround = model("..\\Models\\sand\\sand.obj", true);
+	model water = model("..\\Models\\water\\water.obj", true);
+	model sun = model("..\\Models\\sun\\13913_Sun_v2_l3.obj", true);
+	model fish1 = model("..\\Models\\fish1\\fish.obj", true);
+	model fish2 = model("..\\Models\\fish2\\13009_Coral_Beauty_Angelfish_v1_l3.obj", true);
+	model coral1 = model("..\\Models\\coral1\\21487_Gorgonian_Soft_Coral_v1.obj", true);
+	model coral2 = model("..\\Models\\coral2\\10010_Coral_v1_L3.obj", true);
+	model coral3 = model("..\\Models\\coral3\\21488_Tree_Coral_v2_NEW.obj", true);
 #endif
 
+	glm::vec3 sunPosition = {0.f, 350.f, 0.f};
+
     while (!glfwWindowShouldClose(window)) {
+
+    	struct drawableObject {
+    		model *mod = nullptr;
+    		glm::mat4 modelMatrix;
+    		shader modelShader;
+    	};
+
+    	std::multimap<float, drawableObject> sortedObjects;
 
         double currentFrame = glfwGetTime();
     	pCamera->updateDeltaTime(currentFrame - lastFrame);
         lastFrame = currentFrame;
 
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.f, 0.f, 0.f, 0.0f);
+
+
 
     	basicTexShader.use();
     	basicTexShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    	basicTexShader.SetVec3("lightPos", {0.2f, 100.f, 0.3f});
+    	basicTexShader.SetVec3("lightPos", sunPosition);
     	basicTexShader.SetVec3("viewPos", pCamera->GetPosition());
     	basicTexShader.setInt("texture_diffuse1", 0);
 
     	basicTexShader.setMat4("projection", pCamera->GetProjectionMatrix());
     	basicTexShader.setMat4("view", pCamera->GetViewMatrix());
 
+    	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), sunPosition);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.07f));
+		drawableObject tmp = {&sun, modelMatrix, basicTexShader};
+		float dist = glm::distance(pCamera->GetPosition(), sunPosition);
+		sortedObjects.emplace(dist, tmp);
+
+
     	//render our chunks
     	for(const auto & chunkRow : world.getChunks()) {
     		for(const auto & chunk : chunkRow) {
     			basicTexShader.SetVec3("objectColor", chunk.r, chunk.g, chunk.b);
     			glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), {chunk.x, chunk.y, chunk.z});
-    			//modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
-    			modelMatrix = glm::scale(modelMatrix, glm::vec3(1.1f));
-    			basicTexShader.setMat4("model", modelMatrix);
-    			basicGround.Draw(basicTexShader);
+    			modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
+    			//modelMatrix = glm::rotate(modelMatrix, glm::radians(180.f), glm::vec3(1.f, 1.f, 1.f));
+    			modelMatrix = glm::scale(modelMatrix, glm::vec3(5.5f));
+    			//basicTexShader.setMat4("model", modelMatrix);
+    			//basicGround.Draw(basicTexShader);
+    			drawableObject tmp = {&basicGround, modelMatrix, basicTexShader};
+    			float dist = glm::distance(pCamera->GetPosition(), glm::vec3(chunk.x, chunk.y, chunk.z));
+    			sortedObjects.emplace(dist, tmp);
+
+    			modelMatrix = glm::translate(glm::mat4(1.0), {chunk.x, chunk.y + 170.f, chunk.z});
+    			modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
+    			modelMatrix = glm::scale(modelMatrix, glm::vec3(5.5f));
+    			tmp = {&water, modelMatrix, basicWaterShader};
+    			dist = glm::distance(pCamera->GetPosition(), glm::vec3(chunk.x, chunk.y + 170.f, chunk.z));
+    			sortedObjects.emplace(dist, tmp);
+
+    			for(const auto & obj : chunk.objects) {
+    				modelMatrix = glm::translate(glm::mat4(1.0), obj.position);
+    				//modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), obj.rotation);
+    				if(obj.Id == 2) {
+    					modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
+    				}
+    				if(obj.Id == 1) {
+    					modelMatrix = glm::scale(modelMatrix, obj.scale * 5.f);
+    				} else modelMatrix = glm::scale(modelMatrix, obj.Id == 2 ? obj.scale / 6.f : obj.scale);
+    				model *accesory;
+    				switch(obj.Id) {
+    					case 0:
+    						accesory = &fish1;
+    					break;
+    					case 1:
+    						accesory = &fish2;
+    					break;
+    					case 2:
+    						accesory = &coral2;
+    					break;
+    					case 3:
+    						accesory = &coral1;
+    					break;
+    					case 4:
+    						accesory = &coral3;
+    					break;
+    				}
+    				tmp = {accesory, modelMatrix, basicTexShader};
+    				dist = glm::distance(pCamera->GetPosition(), obj.position);
+    				sortedObjects.emplace(dist, tmp);
+    			}
     		}
     	}
 
-    	glm::vec3 camPos = pCamera->GetPosition();
-    	std::cout << camPos.x << " " << camPos.y << " " << camPos.z << std::endl;
+    	for(std::map<float, drawableObject>::reverse_iterator rIt = sortedObjects.rbegin(); rIt != sortedObjects.rend(); rIt++) {
+    		rIt->second.modelShader.setMat4("model", rIt->second.modelMatrix);
+    		rIt->second.mod->Draw(rIt->second.modelShader);
+    	}
+
+    	// for(auto & [k, v] : sortedObjects) {
+    	// 	v.modelShader.setMat4("model", v.modelMatrix);
+    	// 	v.mod->Draw(v.modelShader);
+    	// }
+
+    	//std::cout << pCamera->GetPosition().y << std::endl;
 
     	basicShader.use();
     	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    	basicShader.SetVec3("lightPos", {0.2f, 100.f, 0.3f});
+    	basicShader.SetVec3("lightPos", sunPosition);
     	basicShader.SetVec3("viewPos", pCamera->GetPosition());
 
     	basicShader.setMat4("projection", pCamera->GetProjectionMatrix());
