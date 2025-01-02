@@ -1,4 +1,3 @@
-
 #include "includes.h"
 #include "model.h"
 #include "shader.h"
