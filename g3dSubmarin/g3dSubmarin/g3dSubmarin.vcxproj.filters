@@ -76,5 +76,17 @@
     <None Include="basicTextureShader.fs">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="basicSunShader.fs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="basicSunShader.vs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="basicWaterShader.fs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="basicWaterShader.vs">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
