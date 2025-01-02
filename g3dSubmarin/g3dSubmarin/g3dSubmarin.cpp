@@ -1,4 +1,6 @@
+#ifndef __linux__
 #include <Windows.h>
+#endif
 #include <locale>
 #include <codecvt>
 #include <map>
