@@ -26,8 +26,6 @@ public:
     worldChunks(float xCenter, float yCenter, float zCenter);
     std::vector<std::vector<worldChunk>>& getChunks();
     void validateChunks(glm::vec3 position);
-    void generateNewChunks(int newCenterX, int newCenterY);
-    worldChunk generateChunk(float startX, float startZ);
     virtual ~worldChunks();
 
 
