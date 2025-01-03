@@ -190,6 +190,7 @@ void camera::applyMovement() {
 
 }
 
+
 glm::mat4 camera::GetModelPos() {
 
         glm::vec3 cameraPos = GetPosition();

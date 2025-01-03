@@ -1,29 +1,30 @@
-//
-// Created by mitza on 10/15/24.
-//
-
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
+
 #include <iostream>
-#include <cstdlib>
-#include <cstdio>
+#include <stdlib.h>
+#include <stdio.h>
 #include <vector>
 #include <fstream>
 #include <string>
-#include <cmath>
-#include <memory>
+#include <math.h>
+#include <memory.h>
+#include <fstream>
 #include <sstream>
 #include <random>
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <GLFW/glfw3.h>
+#include "GL/glew.h"
+#include "GL/freeglut.h"
+#include "GLFW/glfw3.h"
 
-#ifdef __linux__
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#if defined linux
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #else
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
