@@ -34,11 +34,12 @@ int main()
     }
 
      glFrontFace(GL_CCW);
-	// glEnable(GL_CULL_FACE);
- //    glCullFace(GL_FRONT_AND_BACK);
-	// glEnable(GL_DEPTH_TEST);
-	// glDepthFunc(GL_LEQUAL);
-	glDisable(GL_CULL_FACE);
+	 //glEnable(GL_CULL_FACE);
+     //glCullFace(GL_FRONT_AND_BACK);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LESS);
 
 
     glfwMakeContextCurrent(window);
@@ -97,6 +98,8 @@ int main()
 	shader basicTexShader = shader("../basicTextureShader.vs", "../basicTextureShader.fs");
 	shader basicWaterShader = shader("../basicWaterShader.vs",  "../basicWaterShader.fs");
 	shader basicSunShader = shader("../basicSunShader.vs",  "../basicSunShader.fs");
+	shader shadowShader = shader("../shadowShader.vs", "../shadowShader.fs");
+	shader shadowDepthShader = shader("../shadowDepthShader.vs", "../shadowDepthShader.fs");
     model basicModel = model("../Models/Submarine/submarine.obj", true);
 	model basicGround = model("../Models/sand/sand.obj", true);
 	model water = model("../Models/water/water.obj", true);
@@ -131,7 +134,35 @@ int main()
 	model coral3 = model(currentPath + "\\Models\\coral3\\21488_Tree_Coral_v2_NEW.obj", true);
 #endif
 
-	glm::vec3 sunPosition = {0.f, 350.f, 0.f};
+	glm::vec3 sunPosition = {10.f, 350.f, 10.f};
+	glm::vec3 sunColor = {0.8f, 0.8f, 0.8f};
+
+	//shadows
+	const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+	// create depth texture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	// attach depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	shadowShader.use();
+	shadowShader.setInt("texture_diffuse1", 0);
+	shadowShader.setInt("shadowMap", 1);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -152,18 +183,18 @@ int main()
 
 
 
-    	basicTexShader.use();
-    	basicTexShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    	basicTexShader.SetVec3("lightPos", sunPosition);
-    	basicTexShader.SetVec3("viewPos", pCamera->GetPosition());
-    	basicTexShader.setInt("texture_diffuse1", 0);
+    	basicSunShader.use();
+    	basicSunShader.SetVec3("lightColor", sunColor);
+    	basicSunShader.SetVec3("lightPos", sunPosition);
+    	basicSunShader.SetVec3("viewPos", pCamera->GetPosition());
+    	basicSunShader.setInt("texture_diffuse1", 0);
 
-    	basicTexShader.setMat4("projection", pCamera->GetProjectionMatrix());
-    	basicTexShader.setMat4("view", pCamera->GetViewMatrix());
+    	basicSunShader.setMat4("projection", pCamera->GetProjectionMatrix());
+    	basicSunShader.setMat4("view", pCamera->GetViewMatrix());
 
     	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0), sunPosition);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.07f));
-		drawableObject tmp = {&sun, modelMatrix, basicTexShader};
+		drawableObject tmp = {&sun, modelMatrix, basicSunShader};
 		float dist = glm::distance(pCamera->GetPosition(), sunPosition);
 		sortedObjects.emplace(dist, tmp);
 
@@ -191,13 +222,16 @@ int main()
 
     			for(const auto & obj : chunk.objects) {
     				modelMatrix = glm::translate(glm::mat4(1.0), obj.position);
-    				//modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), obj.rotation);
     				if(obj.Id == 2) {
     					modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), glm::vec3(-1.f, 0.f, 0.f));
     				}
-    				if(obj.Id == 1) {
+    				else if(obj.Id == 1) {
+    					modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), obj.rotation);
     					modelMatrix = glm::scale(modelMatrix, obj.scale * 5.f);
-    				} else modelMatrix = glm::scale(modelMatrix, obj.Id == 2 ? obj.scale / 6.f : obj.scale);
+    				} else {
+    					modelMatrix = glm::rotate(modelMatrix, glm::radians(90.f), obj.rotation);
+    					modelMatrix = glm::scale(modelMatrix, obj.Id == 2 ? obj.scale / 6.f : obj.scale);
+    				}
     				model *accesory=nullptr;
     				switch(obj.Id) {
     					case 0:
@@ -223,9 +257,55 @@ int main()
     		}
     	}
 
+    	// 1. render depth of scene to texture (from light's perspective)
+    	glm::mat4 lightProjection, lightView;
+    	glm::mat4 lightSpaceMatrix;
+    	float near_plane = 1.0f, far_plane = 750.5f;
+    	lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+    	lightView = glm::lookAt(sunPosition, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+    	lightSpaceMatrix = lightProjection * lightView;
+
+    	// render scene from light's point of view
+    	shadowDepthShader.use();
+    	shadowDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+    	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    	glClear(GL_DEPTH_BUFFER_BIT);
+    	glEnable(GL_CULL_FACE);
+    	glCullFace(GL_FRONT);
+
     	for(std::map<float, drawableObject>::reverse_iterator rIt = sortedObjects.rbegin(); rIt != sortedObjects.rend(); rIt++) {
-    		rIt->second.modelShader.setMat4("model", rIt->second.modelMatrix);
-    		rIt->second.mod->Draw(rIt->second.modelShader);
+
+    		shadowDepthShader.setMat4("model", rIt->second.modelMatrix);
+    		//rIt->second.modelShader.setMat4("model", rIt->second.modelMatrix);
+    		rIt->second.mod->Draw(shadowDepthShader);
+    	}
+
+    	glCullFace(GL_BACK);
+    	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    	// reset viewport
+    	glViewport(0, 0, 1280, 720);
+    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    	shadowShader.use();
+    	glm::mat4 projection = pCamera->GetProjectionMatrix();
+    	glm::mat4 view = pCamera->GetViewMatrix();
+    	shadowShader.setMat4("projection", projection);
+    	shadowShader.setMat4("view", view);
+    	// set light uniforms
+    	shadowShader.SetVec3("viewPos", pCamera->GetPosition());
+    	shadowShader.SetVec3("lightPos", sunPosition);
+    	shadowShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+    	glActiveTexture(GL_TEXTURE1);
+    	glBindTexture(GL_TEXTURE_2D, depthMap);
+    	glDisable(GL_CULL_FACE);
+
+    	for(std::map<float, drawableObject>::reverse_iterator rIt = sortedObjects.rbegin(); rIt != sortedObjects.rend(); rIt++) {
+    		shadowShader.setMat4("model", rIt->second.modelMatrix);
+    		//rIt->second.modelShader.setMat4("model", rIt->second.modelMatrix);
+    		rIt->second.mod->Draw(shadowShader);
     	}
 
     	// for(auto & [k, v] : sortedObjects) {
@@ -236,7 +316,7 @@ int main()
     	//std::cout << pCamera->GetPosition().y << std::endl;
 
     	basicShader.use();
-    	basicShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    	basicShader.SetVec3("lightColor", sunColor);
     	basicShader.SetVec3("lightPos", sunPosition);
     	basicShader.SetVec3("viewPos", pCamera->GetPosition());
 
@@ -254,6 +334,8 @@ int main()
     	pCamera->applyMovement();
 
     	world.validateChunks(pCamera->GetPosition());
+    	sunPosition.x = world.getChunks()[1][1].x;
+    	sunPosition.z = world.getChunks()[1][1].z;
 
 
         glfwSwapBuffers(window);

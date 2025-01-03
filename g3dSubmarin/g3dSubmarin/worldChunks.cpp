@@ -30,9 +30,9 @@ worldChunk worldChunks::generateChunk(float startX, float startZ) {
         glm::vec3 objScale;
         if(newObj.Id < 2) {
             objPos = glm::vec3(startX - chunkSize / 2 + rand() % (int)chunkSize, 5 + rand() % 100 , startZ - chunkSize / 2 + rand() % (int)chunkSize);
-            objRotation = glm::vec3(0.f);
+            objRotation = glm::vec3(-1 + rand() % 3, -1 + rand() % 3, -1 + rand() % 3);
         } else {
-            objPos = glm::vec3(startX - chunkSize / 2 + rand() % (int)chunkSize, -25 + rand() % 10 , startZ - chunkSize / 2 + rand() % (int)chunkSize);
+            objPos = glm::vec3(startX - chunkSize / 2 + rand() % (int)chunkSize, -50 + rand() % 10 , startZ - chunkSize / 2 + rand() % (int)chunkSize);
             objRotation = glm::vec3(0.f);
         }
         objScale = glm::vec3(rand() % 80 / 10.f);
