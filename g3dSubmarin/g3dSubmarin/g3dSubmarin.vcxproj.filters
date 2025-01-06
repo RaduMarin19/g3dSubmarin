@@ -88,5 +88,17 @@
     <None Include="basicWaterShader.vs">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="shadowDepthShader.fs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="shadowDepthShader.vs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="shadowShader.fs">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="shadowShader.vs">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

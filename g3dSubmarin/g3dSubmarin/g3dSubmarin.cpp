@@ -123,6 +123,8 @@ int main()
 	shader basicTexShader = shader("basicTextureShader.vs", "basicTextureShader.fs");
 	shader basicWaterShader = shader("basicWaterShader.vs",  "basicWaterShader.fs");
 	shader basicSunShader = shader("basicSunShader.vs",  "basicSunShader.fs");
+    shader shadowShader = shader("shadowShader.vs", "shadowShader.fs");
+    shader shadowDepthShader = shader("shadowDepthShader.vs", "shadowDepthShader.fs");
 	model basicModel = model(currentPath + "\\Models\\Submarine\\submarine.obj", true);
 	model basicGround = model(currentPath + "\\Models\\sand\\sand.obj", true);
 	model water = model(currentPath + "\\Models\\water\\water.obj", true);
